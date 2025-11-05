@@ -4,6 +4,14 @@ Ever forgotten to fill in your timesheet, and can't quite remember what you work
 
 **Git Work Log** generates a report of your work activity, including repositories, branches, and commit messages — grouped by date and ordered by time. You don’t even need Git installed locally (though most of us do).
 
+--- 
+
+## Install:
+
+```bash
+go install github.com/olbrichattila/gitworklog@latest
+```
+
 ---
 
 ## Features
