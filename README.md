@@ -38,7 +38,7 @@ repositories:
 
 ## Usage
 ```
-gitworklog <fromDate> [toDate]
+gitworklog [fromDate] [toDate]
 ```
 ### Examples
 
@@ -50,6 +50,16 @@ gitworklog 2025-06-05 2025-06-10
 **Single date:**
 ```bash
 gitworklog 2025-06-05
+```
+
+**Today:**
+```bash
+gitworklog
+```
+
+**Help:**
+```bash
+gitworklog help
 ```
 
 **Redirect output to a file:**

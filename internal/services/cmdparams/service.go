@@ -18,28 +18,51 @@ type service struct {
 }
 
 func (s *service) Get() (dto.CmdParams, error) {
-	var err error
-	result := dto.CmdParams{}
-	if len(os.Args) < 2 {
-		return result, worklogerrors.Wrap(worklogerrors.ErrIncorrectNumberOfParameters, nil, strconv.Itoa(len(os.Args)-1))
+	parCnt := len(os.Args)
+	switch parCnt {
+	case 1:
+		return s.getToday()
+	case 2:
+		return s.getSingleDate()
+	case 3:
+		return s.getDateRange()
+	default:
+		return dto.CmdParams{}, worklogerrors.Wrap(worklogerrors.ErrIncorrectNumberOfParameters, nil, strconv.Itoa(parCnt))
 	}
+}
 
-	result.From, err = time.Parse(time.DateOnly, os.Args[1])
+func (s *service) getToday() (dto.CmdParams, error) {
+	t := time.Now()
+	return dto.CmdParams{
+		From: time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location()),
+		To:   time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 0, t.Location()),
+	}, nil
+}
+
+func (s *service) getSingleDate() (dto.CmdParams, error) {
+	t, err := time.Parse(time.DateOnly, os.Args[1])
 	if err != nil {
-		return result, worklogerrors.Wrap(worklogerrors.ErrIncorrectDateFormat, nil, os.Args[1])
+		return dto.CmdParams{}, worklogerrors.Wrap(worklogerrors.ErrIncorrectDateFormat, nil, os.Args[1])
 	}
+	return dto.CmdParams{
+		From: t,
+		To:   time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 0, t.Location()),
+	}, nil
+}
 
-	if len(os.Args) == 2 {
-		result.To = time.Date(result.From.Year(), result.From.Month(), result.From.Day(), 23, 59, 59, 0, result.From.Location())
-		return result, nil
-	}
-
-	toDate, err := time.Parse(time.DateOnly, os.Args[2])
+func (s *service) getDateRange() (dto.CmdParams, error) {
+	from, err := time.Parse(time.DateOnly, os.Args[1])
 	if err != nil {
-		return result, worklogerrors.Wrap(worklogerrors.ErrIncorrectDateFormat, nil, os.Args[2])
+		return dto.CmdParams{}, worklogerrors.Wrap(worklogerrors.ErrIncorrectDateFormat, nil, os.Args[1])
 	}
 
-	result.To = time.Date(toDate.Year(), toDate.Month(), toDate.Day(), 23, 59, 59, 0, toDate.Location())
+	to, err := time.Parse(time.DateOnly, os.Args[2])
+	if err != nil {
+		return dto.CmdParams{}, worklogerrors.Wrap(worklogerrors.ErrIncorrectDateFormat, nil, os.Args[2])
+	}
 
-	return result, nil
+	return dto.CmdParams{
+		From: from,
+		To:   time.Date(to.Year(), to.Month(), to.Day(), 23, 59, 59, 0, to.Location()),
+	}, nil
 }
