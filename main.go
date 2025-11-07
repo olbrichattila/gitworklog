@@ -27,7 +27,7 @@ func main() {
 func displayUsage() {
 	fmt.Println(
 		`Usage:
-gitworklog <?fromDate> <?toDate>
+gitworklog <fromDate> [toDate]
 
 Example:
 gitworklog 2025-06-05 2025-06-10
