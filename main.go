@@ -3,18 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/olbrichattila/gitworklog/internal/app"
 	"github.com/olbrichattila/gitworklog/internal/worklogerrors"
 )
 
 func main() {
-	if len(os.Args) == 2 && os.Args[1] == "help" {
-		displayUsage()
-		return
-	}
-
 	app, err := app.New()
 	if err != nil {
 		fmt.Println(err.Error())

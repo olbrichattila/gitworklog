@@ -3,6 +3,7 @@ package cmdparams
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/olbrichattila/gitworklog/internal/contracts"
@@ -20,8 +21,6 @@ type service struct {
 func (s *service) Get() (dto.CmdParams, error) {
 	parCnt := len(os.Args)
 	switch parCnt {
-	case 1:
-		return s.getToday()
 	case 2:
 		return s.getSingleDate()
 	case 3:
@@ -40,10 +39,15 @@ func (s *service) getToday() (dto.CmdParams, error) {
 }
 
 func (s *service) getSingleDate() (dto.CmdParams, error) {
+	if strings.ToLower(os.Args[1]) == "today" {
+		return s.getToday()
+	}
+
 	t, err := time.Parse(time.DateOnly, os.Args[1])
 	if err != nil {
 		return dto.CmdParams{}, worklogerrors.Wrap(worklogerrors.ErrIncorrectDateFormat, nil, os.Args[1])
 	}
+
 	return dto.CmdParams{
 		From: t,
 		To:   time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 0, t.Location()),
