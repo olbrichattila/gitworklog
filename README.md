@@ -41,7 +41,7 @@ gitworklog config delete-repository <local repository path>
 ```
 List registered repository paths
 ```bash
-	gitworklog config list-repositories
+gitworklog config list-repositories
 ```
 display registered git user name
 ```bash
