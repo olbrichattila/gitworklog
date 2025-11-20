@@ -12,10 +12,19 @@ type GitManager interface {
 
 type ConfigProvider interface {
 	Get() (dto.Config, error)
+	GetUserName() (string, error)
+	GetRepositories() ([]string, error)
+	SetUserName(name string) error
+	AddRepository(fullPath string) error
+	RemoveRepository(fullPath string) error
 }
 
 type CmdParamProvider interface {
 	Get() (dto.CmdParams, error)
+}
+
+type ConfigCmdProvider interface {
+	Run() (bool, error)
 }
 
 type ReportAggregator interface {

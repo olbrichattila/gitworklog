@@ -26,6 +26,13 @@ type service struct {
 
 func (s *service) Aggregate(configValues dto.Config, cmdParams dto.CmdParams) (map[string][]dto.AggregateItem, error) {
 	aggregate := map[string][]dto.AggregateItem{}
+	if configValues.Username == "" {
+		return aggregate, worklogerrors.Wrap(worklogerrors.ErrMissingUserName, nil, "config")
+	}
+
+	if len(configValues.Repositories) == 0 {
+		return aggregate, worklogerrors.Wrap(worklogerrors.ErrNoRepositories, nil, "config")
+	}
 	for _, gitRepos := range configValues.Repositories {
 		res, err := s.gitManager.Log(gitRepos.Path, configValues.Username, cmdParams.From, cmdParams.To)
 		if err != nil {

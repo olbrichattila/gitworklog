@@ -25,13 +25,27 @@ go install github.com/olbrichattila/gitworklog@latest
 
 ## Configuration
 
-Create a config.yaml file in the same directory as the executable:
+You can configure your command with the following commands:
 
-```yaml
-username: "itsme@gmail.com"
-repositories:
-  - path: "/home/johndoe/myrepo1"
-  - path: "/home/johndoe/myrepo2"
+Add a new git user email:
+```bash
+gitworklog config set-name <user email address>
+```
+Add a new local repository path:	
+```bash
+gitworklog config add-repository <local repository path>
+```
+Delete from the list of local repository paths:	
+```bash
+gitworklog config delete-repository <local repository path>
+```
+List registered repository paths
+```bash
+	gitworklog config list-repositories
+```
+display registered git user name
+```bash
+gitworklog config get-name
 ```
 
 ---

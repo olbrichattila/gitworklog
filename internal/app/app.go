@@ -7,30 +7,34 @@ import (
 	"github.com/olbrichattila/gitworklog/internal/dto"
 	"github.com/olbrichattila/gitworklog/internal/services/cmdparams"
 	"github.com/olbrichattila/gitworklog/internal/services/config"
+	"github.com/olbrichattila/gitworklog/internal/services/configcmd"
 	"github.com/olbrichattila/gitworklog/internal/services/gitmanager"
 	"github.com/olbrichattila/gitworklog/internal/services/reportaggregator"
 	"github.com/olbrichattila/gitworklog/internal/services/reportdisplay"
 	"github.com/olbrichattila/gitworklog/internal/worklogerrors"
 )
 
-const (
-	configFileName = "./config.yaml"
-)
-
 type application struct {
-	GitManager       contracts.GitManager
-	ConfigProvider   contracts.ConfigProvider
-	CmdParamProvider contracts.CmdParamProvider
-	ReportAggregator contracts.ReportAggregator
-	ReportDisplay    contracts.ReportDisplay
+	gitManager        contracts.GitManager
+	configProvider    contracts.ConfigProvider
+	configCmdProvider contracts.ConfigCmdProvider
+	cmdParamProvider  contracts.CmdParamProvider
+	reportAggregator  contracts.ReportAggregator
+	reportDisplay     contracts.ReportDisplay
 }
 
 func New() (contracts.AppProvider, error) {
 	cmdPars := cmdparams.New()
+
 	gitMgr := gitmanager.New()
 	reportDisplay := reportdisplay.New()
 
-	cnf, err := config.New(configFileName)
+	cnf, err := config.New()
+	if err != nil {
+		return nil, worklogerrors.Wrap(worklogerrors.ErrApplication, err, "config")
+	}
+
+	configCmdPars, err := configcmd.New(cnf)
 	if err != nil {
 		return nil, worklogerrors.Wrap(worklogerrors.ErrApplication, err, "config")
 	}
@@ -43,35 +47,46 @@ func New() (contracts.AppProvider, error) {
 	}
 
 	app := &application{
-		GitManager:       gitMgr,
-		ConfigProvider:   cnf,
-		CmdParamProvider: cmdPars,
-		ReportAggregator: reportAgg,
-		ReportDisplay:    reportDisplay,
+		gitManager:        gitMgr,
+		configProvider:    cnf,
+		cmdParamProvider:  cmdPars,
+		reportAggregator:  reportAgg,
+		reportDisplay:     reportDisplay,
+		configCmdProvider: configCmdPars,
 	}
 
 	return app, nil
 }
 
 func (a *application) Run() error {
-	cmdParams, err := a.CmdParamProvider.Get()
+	executed, err := a.configCmdProvider.Run()
+	if err != nil {
+		return worklogerrors.Wrap(worklogerrors.ErrApplication, err, "cmd config parameters")
+	}
+
+	// If it was only configuration, exit
+	if executed {
+		return nil
+	}
+
+	cmdParams, err := a.cmdParamProvider.Get()
 	if err != nil {
 		return worklogerrors.Wrap(worklogerrors.ErrApplication, err, "cmd params")
 	}
 
-	configValues, err := a.ConfigProvider.Get()
+	configValues, err := a.configProvider.Get()
 	if err != nil {
 		return worklogerrors.Wrap(worklogerrors.ErrApplication, err, "config")
 	}
 
-	aggregate, err := a.ReportAggregator.Aggregate(configValues, cmdParams)
+	aggregate, err := a.reportAggregator.Aggregate(configValues, cmdParams)
 	if err != nil {
 		return worklogerrors.Wrap(worklogerrors.ErrApplication, err, "aggregation")
 	}
 
 	keys := a.sortedKeys(aggregate)
 	for _, commitDateString := range keys {
-		a.ReportDisplay.Display(commitDateString, aggregate)
+		a.reportDisplay.Display(commitDateString, aggregate)
 	}
 
 	return nil

@@ -4,11 +4,13 @@ import (
 	"time"
 )
 
+type Repository struct {
+	Path string `yaml:"path"`
+}
+
 type Config struct {
-	Username     string `yaml:"username"`
-	Repositories []struct {
-		Path string `yaml:"path"`
-	} `yaml:"repositories"`
+	Username     string       `yaml:"username"`
+	Repositories []Repository `yaml:"repositories"`
 }
 
 type GitCommit struct {
